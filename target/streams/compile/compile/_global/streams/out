@@ -1,10 +1,10 @@
-[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Interaction.scala:3:38: Unused import[0m
-[0m[[0m[33mwarn[0m] [0m[0mimport com.sksamuel.scrimage.{Image, Pixel}[0m
-[0m[[0m[33mwarn[0m] [0m[0m                                     ^[0m
-[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization.scala:3:38: Unused import[0m
-[0m[[0m[33mwarn[0m] [0m[0mimport com.sksamuel.scrimage.{Image, Pixel}[0m
-[0m[[0m[33mwarn[0m] [0m[0m                                     ^[0m
-[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization2.scala:3:38: Unused import[0m
-[0m[[0m[33mwarn[0m] [0m[0mimport com.sksamuel.scrimage.{Image, Pixel}[0m
-[0m[[0m[33mwarn[0m] [0m[0m                                     ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization2.scala:9:56: Unused import[0m
+[0m[[0m[33mwarn[0m] [0m[0mimport scala.collection.parallel.{ForkJoinTaskSupport, ForkJoinTasks}[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                                       ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Interaction.scala:114:79: type ForkJoinPool in package forkjoin is deprecated (since 2.12.0): use java.util.concurrent.ForkJoinPool directly, instead of this alias[0m
+[0m[[0m[33mwarn[0m] [0m[0m    years.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(2))[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                                                              ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization2.scala:92:85: type ForkJoinPool in package forkjoin is deprecated (since 2.12.0): use java.util.concurrent.ForkJoinPool directly, instead of this alias[0m
+[0m[[0m[33mwarn[0m] [0m[0m    normalYears.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(parallelism))[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                                                                    ^[0m
 [0m[[0m[33mwarn[0m] [0m[0mthree warnings found[0m
