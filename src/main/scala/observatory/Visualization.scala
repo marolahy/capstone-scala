@@ -2,31 +2,10 @@ package observatory
 
 import com.sksamuel.scrimage.{Image, Pixel}
 
-import scala.math.Pi
-
 /**
   * 2nd milestone: basic visualization
   */
 object Visualization extends VisualizationInterface {
-
-  val r = 6378 // radius of earth
-  val pInverseWeight = 6
-
-  def areAntipodes(loc1: Location, loc2: Location): Boolean =
-    loc1.lat + loc2.lat == 0 && math.abs(loc1.lon - loc2.lon) == 180d
-
-  def distance(p: Location, q: Location): Double = {
-    val pLat = p.lat * Pi / 180
-    val pLon = p.lon * Pi / 180
-    val qLat = q.lat * Pi / 180
-    val qLon = q.lon * Pi / 180
-    val dLan = math.abs(pLat - qLat)
-    val dLon = math.abs(pLon - qLon)
-
-    if (dLan == 0 && dLon == 0) 0
-    else if (areAntipodes(p, q)) Pi
-    else math.acos(math.sin(pLat) * math.sin(qLat) + math.cos(pLat) * math.cos(qLat) * math.cos(dLon))
-  }
 
   /**
     * @param temperatures Known temperatures: pairs containing a location and the temperature at this location
@@ -34,20 +13,41 @@ object Visualization extends VisualizationInterface {
     * @return The predicted temperature at `location`
     */
   def predictTemperature(temperatures: Iterable[(Location, Temperature)], location: Location): Temperature = {
-    val found = temperatures.find(x ⇒ (r * distance(location, x._1)) <= 1).map(_._2)
+    val (p1, l1) = (location.lat.toRadians, location.lon.toRadians)
+    val distanceTemp: Iterable[(Double, Temperature)] = temperatures
+      .map({ case (Location(lat, lon), temp) => ((lat.toRadians, lon.toRadians), temp)})
+      .map({ case ((p2, l2), temp) => (computeDistance(p1, l1, p2, l2), temp)})
+    val underOneKilometer: List[(Double, Temperature)] = distanceTemp.filter({ case (dist, _) => dist <= 1 }).toList
+    val closestUnderOneKilometer: Option[(Double, Temperature)] =
+      if (underOneKilometer.isEmpty) None else Some(underOneKilometer.sortBy(_._1).take(1).head)
 
-    found.getOrElse {
-      val (weightedTempSum, weightSum) = temperatures
-        .map {
-          case (point, temperature) ⇒
-            val weight = 1.0 / math.pow(distance(point, location), pInverseWeight)
-            (temperature * weight, weight)
-        }
-        .reduce[(Double, Double)] {
-          case (a: (Double, Double), b: (Double, Double)) ⇒ (a._1 + b._1, a._2 + b._2)
-        }
-      weightedTempSum / weightSum
-    }
+    if (closestUnderOneKilometer.isDefined) closestUnderOneKilometer.get._2
+    else inverseDistanceWeighting(distanceTemp)
+  }
+
+  def inverseDistanceWeighting(distanceTemp: Iterable[(Double, Temperature)])(implicit p: Int = 3): Temperature = {
+    def weight(distance: Double): Double = 1 / Math.pow(distance, p)
+    val (numerator, denominator) = distanceTemp
+      .aggregate((0d, 0d))(
+        { case ((numerator, denominator), (dist, temp)) => (numerator + weight(dist) * temp, denominator + weight(dist)) },
+        { case ((numerator1, denominator1), (numerator2, denominator2)) => (numerator1 + numerator2, denominator1 + denominator2)})
+
+    numerator / denominator
+  }
+
+  def computeDistance(p1: Double, l1: Double, p2: Double, l2: Double): Double = {
+    import Math._
+
+    lazy val areSameLocation = p1 == p2 && (l1 == l2 || (abs(l1) == 180 && abs(l2) == 180))
+    lazy val areAntipodes = p1 == -p2 && (l1 == l2 - 180 || l1 == l2 + 180)
+
+    val centralAngle =
+      if (areSameLocation) 0
+      else if (areAntipodes) PI
+      else acos(sin(p1) * sin(p2) + cos(p1) * cos(p2) * cos(abs(l1 - l2)))
+    val earthRadius = 6371 // [km]
+
+    earthRadius * centralAngle
   }
 
   /**
@@ -56,26 +56,40 @@ object Visualization extends VisualizationInterface {
     * @return The color that corresponds to `value`, according to the color scale defined by `points`
     */
   def interpolateColor(points: Iterable[(Temperature, Color)], value: Temperature): Color = {
-    val sorted       = points.toList.sortBy(_._1)
-    val higherOption = sorted.find(_._1 >= value)
-    val lowerOption  = sorted.reverse.find(_._1 <= value)
+    if (points.isEmpty) throw new Exception("no points")
 
-    if (higherOption.isEmpty && lowerOption.isEmpty) Color(0, 0, 0)
-    else if (higherOption.isEmpty) lowerOption.get._2
-    else if (lowerOption.isEmpty) higherOption.get._2
-    else {
-      val (t1, c1) = higherOption.get
-      val (t0, c0) = lowerOption.get
-      if (t1 == t0) c1
-      else {
-        val (r1, g1, b1) = (c1.red, c1.green, c1.blue)
-        val (r0, g0, b0) = (c0.red, c0.green, c0.blue)
-        val r = ((r0 * (t1 - value) + r1 * (value - t0)) / (t1 - t0)).round.toInt
-        val g = ((g0 * (t1 - value) + g1 * (value - t0)) / (t1 - t0)).round.toInt
-        val b = ((b0 * (t1 - value) + b1 * (value - t0)) / (t1 - t0)).round.toInt
-        Color(r, g, b)
-      }
-    }
+    // is foldLeft more performant than max . filter ???
+    val closestLowerOpt = points.foldLeft[Option[(Temperature, Color)]](None)((acc, curr) => (acc, curr) match {
+      case (_, (temp, _)) if temp > value => acc
+      case (Some((tempAcc, _)), (temp, _)) if tempAcc > temp => acc
+      case _ => Some(curr)
+    })
+
+    val closestHigherOpt = points.foldLeft[Option[(Temperature, Color)]](None)((acc, curr) => (acc, curr) match {
+      case (_, (temp, _)) if temp < value => acc
+      case (Some((tempAcc, _)), (temp, _)) if tempAcc < temp => acc
+      case _ => Some(curr)
+    })
+
+    if (closestLowerOpt.isEmpty) return closestHigherOpt.get._2
+    if (closestHigherOpt.isEmpty) return closestLowerOpt.get._2
+
+    val closestLower = closestLowerOpt.get
+    val closestHigher = closestHigherOpt.get
+
+    if (closestLower._1 == closestHigher._1) return closestLower._2
+
+    val fraction = (value - closestLower._1) / (closestHigher._1 - closestLower._1)
+
+    Color(
+      interpolateSingleColor(closestHigher._2.red, closestLower._2.red, fraction),
+      interpolateSingleColor(closestHigher._2.green, closestLower._2.green, fraction),
+      interpolateSingleColor(closestHigher._2.blue, closestLower._2.blue, fraction)
+    )
+  }
+
+  def interpolateSingleColor(color1: Int, color2: Int, fraction: Double): Int = {
+    Math.rint((color1 - color2) * fraction + color2).toInt
   }
 
   /**
@@ -84,16 +98,22 @@ object Visualization extends VisualizationInterface {
     * @return A 360×180 image where each pixel shows the predicted temperature at its location
     */
   def visualize(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)]): Image = {
-    val cords = for {
-      lat ← 90 until (-90, -1)
-      lon ← -180 until 180
-    } yield (lat, lon)
-    val pixels = cords.par.map { case (lat, lon) ⇒
-      val temp  = predictTemperature(temperatures, Location(lat, lon))
-      val color = interpolateColor(colors,         temp)
-      Pixel(color.red, color.green, color.blue, 127)
-    }.toArray
-    Image(360, 180, pixels)
+    val (w, h) = (360, 180)
+    val pixels = new Array[Pixel](w * h)
+
+    for (lat <- 90 to -89 by -1) {
+//      println("!!!!!!!!!!!!!!!! x", lat)
+      for (lon <- -180 to 179) {
+        val temperature = predictTemperature(temperatures, Location(lat, lon))
+        val color = interpolateColor(colors, temperature)
+        val arrayIdx = w * Math.abs(lat - 90) + (lon + 180)
+
+        pixels(arrayIdx) = Pixel(color.red, color.green, color.blue, 255)
+      }
+    }
+
+    Image(w, h, pixels)
   }
 
 }
+

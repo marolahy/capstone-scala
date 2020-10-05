@@ -1,12 +1,6 @@
 package observatory
 
-import java.io.File
-
 import com.sksamuel.scrimage.{Image, Pixel}
-import observatory.Interaction.{multiplier, tileLocation, tilePixels}
-import observatory.Visualization.interpolateColor
-
-import scala.collection.parallel.{ForkJoinTaskSupport, ForkJoinTasks}
 
 /**
   * 5th milestone: value-added information visualization
@@ -24,30 +18,12 @@ object Visualization2 extends Visualization2Interface {
     */
   def bilinearInterpolation(
     point: CellPoint,
-    d00:   Temperature,
-    d01:   Temperature,
-    d10:   Temperature,
-    d11:   Temperature
+    d00: Temperature,
+    d01: Temperature,
+    d10: Temperature,
+    d11: Temperature
   ): Temperature = {
-    val x = point.x
-    val y = point.y
-    (d00 * (1 - x) + d10 * x) * (1 - y) + y * (d01 * (1 - x) + d11 * x)
-  }
-
-  def temperaturePredictionHelper(grid: GridLocation ⇒ Temperature, loc: Location): Temperature = {
-    val lon      = loc.lon
-    val lat      = loc.lat
-    val lonCeil  = lon.ceil.toInt
-    val lonFloor = lon.floor.toInt
-    val latCeil  = lat.ceil.toInt
-    val latFloor = lat.floor.toInt
-    val x        = lon - lonFloor
-    val y        = lat - latFloor
-    val t00 = grid(GridLocation(latFloor, lonFloor))
-    val t01 = grid(GridLocation(latCeil,  lonFloor))
-    val t10 = grid(GridLocation(latFloor, lonCeil))
-    val t11 = grid(GridLocation(latCeil,  lonCeil))
-    bilinearInterpolation(CellPoint(x, y), t00, t01, t10, t11)
+    ???
   }
 
   /**
@@ -57,62 +33,11 @@ object Visualization2 extends Visualization2Interface {
     * @return The image of the tile at (x, y, zoom) showing the grid using the given color scale
     */
   def visualizeGrid(
-    grid:   GridLocation ⇒ Temperature,
+    grid: GridLocation => Temperature,
     colors: Iterable[(Temperature, Color)],
-    tile:   Tile
+    tile: Tile
   ): Image = {
-    val pixels = tilePixels(tile)
-      .map(tileLocation)
-      .map(temperaturePredictionHelper(grid, _))
-      .map(interpolateColor(colors, _))
-      .map(col ⇒ Pixel(col.red, col.green, col.blue, 127))
-      .toArray
-    Image(multiplier, multiplier, pixels).scale(256 / multiplier)
-  }
-
-  def generateImageDeviation(year: Year, tile: Tile, data: GridLocation ⇒ Temperature): Unit = {
-    val colors = List(
-      (7d,  Color(0,   0,   0)),
-      (4d,  Color(255, 0,   0)),
-      (2d,  Color(255, 255, 0)),
-      (0d,  Color(255, 255, 255)),
-      (-2d, Color(0,   255, 255)),
-      (-7d, Color(0,   0,   255))
-    )
-    val image = this.visualizeGrid(data, colors, tile)
-    val path  = s"target/deviations/$year/${tile.zoom}/${tile.x}-${tile.y}.png"
-    val file  = new File(path)
-    file.getParentFile.mkdirs()
-    image.output(file)
-  }
-
-  def main(args: Array[String]): Unit = {
-    val parallelism = 2
-    val normalYears = (1975 to 1990).par
-    normalYears.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(parallelism))
-
-    val temperaturess = for {
-      year ← normalYears
-    } yield {
-      println("Computing avg for year: " + year)
-      val yearData = Extraction.locateTemperatures(year, "/stations.csv", s"/$year.csv")
-      Extraction.locationYearlyAverageRecords(yearData)
-    }
-    val normals = Manipulation.average(temperaturess.seq)
-
-    val deviationYears = 1991 to 2015
-//    deviationYears.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(parallelism))
-    val yearlyGrids = for {
-      year ← deviationYears
-    } yield {
-      println("Computing grid for year: " + year)
-      val yearData = Extraction.locateTemperatures(year, "/stations.csv", s"/$year.csv")
-      val avgData  = Extraction.locationYearlyAverageRecords(yearData)
-      (year, Manipulation.deviation(avgData, normals))
-    }
-
-    Interaction.generateTiles(yearlyGrids, generateImageDeviation)
-
+    ???
   }
 
 }
