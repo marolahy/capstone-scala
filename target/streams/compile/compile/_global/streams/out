@@ -1,0 +1,10 @@
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Interaction.scala:3:38: Unused import[0m
+[0m[[0m[33mwarn[0m] [0m[0mimport com.sksamuel.scrimage.{Image, Pixel}[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                     ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization.scala:3:38: Unused import[0m
+[0m[[0m[33mwarn[0m] [0m[0mimport com.sksamuel.scrimage.{Image, Pixel}[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                     ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization2.scala:3:38: Unused import[0m
+[0m[[0m[33mwarn[0m] [0m[0mimport com.sksamuel.scrimage.{Image, Pixel}[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                     ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mthree warnings found[0m
