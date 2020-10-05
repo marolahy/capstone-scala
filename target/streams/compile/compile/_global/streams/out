@@ -1,4 +1,22 @@
-[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Interaction.scala:3:38: Unused import[0m
-[0m[[0m[33mwarn[0m] [0m[0mimport com.sksamuel.scrimage.{Image, Pixel}[0m
-[0m[[0m[33mwarn[0m] [0m[0m                                     ^[0m
-[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization2.scala:109:22: Adapting argument list by creating a 2-tuple: this may not be what you want.[0m
+[0m[[0m[33mwarn[0m] [0m[0m        signature: Predef.println(x: Any): Unit[0m
+[0m[[0m[33mwarn[0m] [0m[0m  given arguments: "Generating Image at Tile : ", scala.Tuple3(x, y, zoom)[0m
+[0m[[0m[33mwarn[0m] [0m[0m after adaptation: Predef.println(("Generating Image at Tile : ", scala.Tuple3(x, y, zoom)): (String, (Int, Int, Int)))[0m
+[0m[[0m[33mwarn[0m] [0m[0m              println("Generating Image at Tile : ", (x, y, zoom))[0m
+[0m[[0m[33mwarn[0m] [0m[0m                     ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization2.scala:111:22: Adapting argument list by creating a 2-tuple: this may not be what you want.[0m
+[0m[[0m[33mwarn[0m] [0m[0m        signature: Predef.println(x: Any): Unit[0m
+[0m[[0m[33mwarn[0m] [0m[0m  given arguments: "Generated Image Successfully at Tile : ", scala.Tuple3(x, y, zoom)[0m
+[0m[[0m[33mwarn[0m] [0m[0m after adaptation: Predef.println(("Generated Image Successfully at Tile : ", scala.Tuple3(x, y, zoom)): (String, (Int, Int, Int)))[0m
+[0m[[0m[33mwarn[0m] [0m[0m              println("Generated Image Successfully at Tile : ", (x, y, zoom))[0m
+[0m[[0m[33mwarn[0m] [0m[0m                     ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization2.scala:4:20: Unused import[0m
+[0m[[0m[33mwarn[0m] [0m[0mimport scala.math.{floor, abs}[0m
+[0m[[0m[33mwarn[0m] [0m[0m                   ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization2.scala:4:27: Unused import[0m
+[0m[[0m[33mwarn[0m] [0m[0mimport scala.math.{floor, abs}[0m
+[0m[[0m[33mwarn[0m] [0m[0m                          ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mC:\projet\coursera\temp\observatory\src\main\scala\observatory\Visualization2.scala:6:22: Unused import[0m
+[0m[[0m[33mwarn[0m] [0m[0mimport Visualization._[0m
+[0m[[0m[33mwarn[0m] [0m[0m                     ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m5 warnings found[0m

@@ -1,5 +1,7 @@
 package observatory
 
+import Visualization._
+
 /**
   * 4th milestone: value-added information
   */
@@ -11,12 +13,14 @@ object Manipulation extends ManipulationInterface {
     *         returns the predicted temperature at this location
     */
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
-
-    val grids: Iterable[(Int, Int) => Double] = temperaturess.map(makeGrid)
-
-    (lat, lon) => {
-      val temps = grids.map(grid => grid(lat, lon))
-      temps.sum / temps.size
+    val memo = Map[GridLocation, Temperature]()
+    (gridLocation: GridLocation) => {
+      memo.get(gridLocation) match {
+        case Some(temperature) => temperature
+        case _ => 
+          val location = Location(gridLocation.lat, gridLocation.lon)
+          Visualization.predictTemperature(temperatures, location)
+      }
     }
   }
 
@@ -25,8 +29,23 @@ object Manipulation extends ManipulationInterface {
     *                      is a collection of pairs of location and temperature)
     * @return A function that, given a latitude and a longitude, returns the average temperature at this location
     */
-  def average(temperaturess: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature = {
-    ???
+  def average(temperatures: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature = {
+    val yearlyGrids = temperatures.map {
+      case averageLocationTemperatures => 
+        makeGrid(averageLocationTemperatures)
+    }
+    val memo = Map[GridLocation, Temperature]()
+    (gridLocation: GridLocation) => {
+      memo.get(gridLocation) match {
+        case Some(temperature) => temperature
+        case _ => 
+          val gridLocationYearlyTemperatures = yearlyGrids.map {
+            case makeGridFn => 
+              makeGridFn(gridLocation)
+          }
+          gridLocationYearlyTemperatures.sum / gridLocationYearlyTemperatures.size  
+      }          
+    }
   }
 
   /**
@@ -35,9 +54,16 @@ object Manipulation extends ManipulationInterface {
     * @return A grid containing the deviations compared to the normal temperatures
     */
   def deviation(temperatures: Iterable[(Location, Temperature)], normals: GridLocation => Temperature): GridLocation => Temperature = {
-    ???
+    val makeGridFn = makeGrid(temperatures)
+    val memo = Map[GridLocation, Temperature]()
+    (gridLocation: GridLocation) => {
+      memo.get(gridLocation) match {
+        case Some(temperature) => temperature
+        case _ =>
+          val currentTemperature = makeGridFn(gridLocation)
+          val normalTemperature = normals(gridLocation)
+          currentTemperature - normalTemperature
+      }      
+    }
   }
-
-
 }
-
